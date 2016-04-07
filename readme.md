@@ -2,4 +2,4 @@
 
 An interactive, visual demonstration of the four color theorem.
 
-More to follow.
+Powered by [ProcessingJS](http://processingjs.org/).
