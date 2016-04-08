@@ -1,3 +1,9 @@
+/*
+Some code for drawing on a canvas and then color the whole thing.
+Work in progress.
+*/
+
+
 /* Some general variables. */
 int scale = 4;
 int h = 300;
@@ -37,20 +43,46 @@ void setup() {
 
 /* Main loop */
 void draw() {
-    background(255);
-    stroke(0);
-    fill(255);
-    rect(50, 50, grid_w-1, grid_h-1);
-
-    // draw lines
-    for (int i = 0; i < lines.size(); i++) {
-        PVector a = lines.get(i)[0];
-        PVector b = lines.get(i)[1];
-        line(a.x, a.y, b.x, b.y);
+    if (solve_stage >= 0) solve();
+    if (stop_updating) {
+        // only update inner grid
+        update_pixels();
     }
+    else {
+        background(255);
+        //stroke(0, 0, 0);
+        stroke(0);
+        fill(255);
+        rect(50, 50, grid_w-1, grid_h-1);
+
+        // draw lines
+        for (int i = 0; i < lines.size(); i++) {
+            PVector a = lines.get(i)[0];
+            PVector b = lines.get(i)[1];
+            draw_line(a.x, a.y, b.x, b.y);
+        }
 
         // draw temporary line while dragging
-    if (dragging) line(start.x, start.y, end.x, end.y);
+        if (dragging) draw_line(start.x, start.y, end.x, end.y);
+    }
+}
+
+/* Draws a line with the Bresenham line algorithm.
+Adapted from http://stackoverflow.com/a/4672319/811708 */
+void draw_line(int x0, int y0, int x1, int y1) {
+    float dx = abs(x1-x0);
+    float dy = Math.abs(y1-y0);
+    float sx = (x0 < x1) ? 1 : -1;
+    float sy = (y0 < y1) ? 1 : -1;
+    float err = dx-dy;
+
+    while(true){
+        point(x0, y0);
+        if ((x0==x1) && (y0==y1)) break;
+        float e2 = 2*err;
+        if (e2 >-dy) { err -= dy; x0  += sx; }
+        if (e2 < dx) { err += dx; y0  += sy; }
+   }
 }
 
 /* mouse input */
@@ -70,12 +102,13 @@ void mouseReleased() {
     start = new PVector(end.x, end.y); // build map by single clicks
 }
 
-/* Main solving method. */
+/* Main solving method.
+The solving takes place in stages and logs its progress. */
 void solve() {
     // TODO integrate solve_stage
 
     // TODO find nodes
-    
+
     // TODO find marginal points
 
     // TODO find neighbors/edges
