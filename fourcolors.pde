@@ -67,6 +67,20 @@ void draw() {
     }
 }
 
+/* Draw a line with certain thickness.
+An own implementation because line() is always smooth on HTML5 canvas.*/
+void draw_point(int x, int y) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            int px = x-1+i;
+            int py = y-1+j;
+            if (px >= grid_margin && px < (grid_w + grid_margin)
+            && py >= grid_margin && py < (grid_h + grid_margin))
+                point(px, py);
+        }
+    }
+}
+
 /* Draws a line with the Bresenham line algorithm.
 Adapted from http://stackoverflow.com/a/4672319/811708 */
 void draw_line(int x0, int y0, int x1, int y1) {
@@ -77,7 +91,7 @@ void draw_line(int x0, int y0, int x1, int y1) {
     float err = dx-dy;
 
     while(true){
-        point(x0, y0);
+        draw_point(x0, y0);
         if ((x0==x1) && (y0==y1)) break;
         float e2 = 2*err;
         if (e2 >-dy) { err -= dy; x0  += sx; }
@@ -107,13 +121,11 @@ The solving takes place in stages and logs its progress. */
 void solve() {
     // TODO integrate solve_stage
 
-    // TODO find nodes
-
     // TODO find marginal points
 
-    // TODO find neighbors/edges
+    // TODO find nodes
 
-    // TODO build graph
+    // TODO find neighbors/edges
 
     // TODO solve graph
 
