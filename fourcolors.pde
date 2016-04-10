@@ -148,6 +148,57 @@ void solve() {
 
 }
 
+void update_pixels() {
+    loadPixels();
+    for (int y = 0; y < grid_h; y++) {
+        for (int x = 0; x < grid_w; x++) {
+            int dest = (grid_margin+y)*w + x+grid_margin;
+            pixels[dest] = grid[y*grid_w + x];
+        }
+    }
+    updatePixels();
+
+    // TODO name nodes? display text?
+
+    // visible edges
+    stroke(pink);
+    strokeWeight(4);
+    for (int i = 0; i < visible_edges.size(); i++) {
+        PVector[] pts = visible_edges.get(i);
+        line(pts[0].x, pts[0].y, pts[1].x, pts[1].y);
+    }
+
+    stroke(black);
+    strokeWeight(1);
+}
+
+/* Fill area with color c using BFS. */
+void fill_area(x, y, c) {
+    ArrayList queue = new ArrayList();
+    queue.add(new PVector(x, y));
+
+    while (queue.size() > 0) {
+        // pop point from list and color it
+        int last = queue.size() - 1;
+        PVector p = queue.get(last);
+        queue.remove(last);
+        grid[p.y*grid_w + p.x] = c;
+
+        // check neighbors
+        if (check_color(p.x, p.y+1, white)) queue.add(new PVector(p.x, p.y+1));
+        if (check_color(p.x, p.y-1, white)) queue.add(new PVector(p.x, p.y-1));
+        if (check_color(p.x+1, p.y, white)) queue.add(new PVector(p.x+1, p.y));
+        if (check_color(p.x-1, p.y, white)) queue.add(new PVector(p.x-1, p.y));
+    }
+}
+
+boolean check_color(int x, int y, color col) {
+    // border-safe color check
+    if (x < 0 || y < 0 || x >= grid_w || y >= grid_h) { return false; }
+    else if (grid[y*grid_w + x] == col) { return true; }
+    else { return false; }
+}
+
 
 void button_generate_image() {
     img_data = document.getElementsByTagName("canvas")[0].toDataURL();
