@@ -130,3 +130,9 @@ void solve() {
     // TODO solve graph
 
 }
+
+
+void button_generate_image() {
+    img_data = document.getElementsByTagName("canvas")[0].toDataURL();
+    document.getElementById("data").innerHTML = 'Generated image: <br> <img height="50" src="' + img_data + '">'
+}
