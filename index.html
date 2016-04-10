@@ -4,8 +4,14 @@
   <meta charset="utf-8" />
   <title>Four colors</title>
   <script type="text/javascript" src="processing.min.js"></script>
+  <!-- <script type="text/javascript" src="randomColor.js"></script> -->
 </head>
 <body>
     <canvas data-processing-sources="fourcolors.pde"></canvas> <br>
+    <button onClick="Processing.instances[0].button_reset()">Reset</button>
+    <button onClick="Processing.instances[0].button_solve()">Solve</button>
+    <button onClick="Processing.instances[0].button_generate_image()">Generate Image</button>
+    <div id="data"></div>
+    <div id="log"></div>
 </body>
 </html>

@@ -24,10 +24,15 @@ color g = color(#338823);
 color y = color(#FAEA04);
 
 color[] colors = [r, b, g, y];
+ArrayList nodes = new ArrayList();
+ArrayList edges = new ArrayList();
+ArrayList marginal_points = new ArrayList();
+ArrayList visible_edges = new ArrayList();
 
 ArrayList lines = new ArrayList();
 PVector start, end;
 boolean dragging;
+boolean stop_updating = false;
 float solve_start;
 
 /* Setting up canvas. */
@@ -114,6 +119,18 @@ void mouseReleased() {
     end = new PVector(mouseX, mouseY);
     lines.add([start, end]);
     start = new PVector(end.x, end.y); // build map by single clicks
+}
+
+void button_reset() {
+    lines = new ArrayList();
+    stop_updating = false;
+    document.getElementById("data").innerHTML = '';
+    document.getElementById("log").innerHTML = '';
+}
+
+void button_solve() {
+    solve_stage = 0;
+    stop_updating = true;
 }
 
 /* Main solving method.
