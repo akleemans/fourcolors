@@ -153,7 +153,7 @@ void solve() {
     else if (solve_stage == 1 && check_time()) { solve_stage++; }
     else if (solve_stage == 2) {
         update_status("Analyzing areas & finding nodes...");
-        // TODO find nodes
+        find_nodes();
         update_pixels();
         update_status("Found a total of " + nodes.size() + " areas/nodes.");
         solve_stage++;
@@ -225,6 +225,22 @@ void update_pixels() {
 void update_status(String s) {
     document.getElementById("log").innerHTML += '<br>' + s;
     console.log(s);
+}
+
+/* Loop through pixels.
+If a white one was found, trigger BFS fill_area().*/
+void find_nodes() {
+    for (int y = 0; y < grid_h; y++) {
+        for (int x = 0; x < grid_w; x++) {
+            if (grid[grid_w*y + x] == white) {
+                color col;
+                // color is our node key, avoid collisions
+                do { col = random_color(); } while (nodes.contains(col));
+                nodes.add(col);
+                fill_area(x, y, col);
+            }
+        }
+    }
 }
 
 color random_color() {
