@@ -162,6 +162,7 @@ void solve() {
     else if (solve_stage == 4) {
         update_status("Analyzing neighbors & finding edges...");
         // TODO generate graph pt. 2: find edges
+
         update_status("Found a total of " + edges.size() + " edges.");
         solve_stage++;
     }
@@ -241,6 +242,25 @@ void find_nodes() {
             }
         }
     }
+}
+
+ArrayList find_marginal_points(color c) {
+    ArrayList points = new ArrayList();
+
+    // check neighbors of point, if point touches black its marginal
+    for (int y = 0; y < grid_h; y++) {
+        for (int x = 0; x < grid_w; x++) {
+            if (grid[grid_w*y + x] == c) {
+                // TODO also check diagonal points?
+                if (check_color(x+1, y, black)) {points.add(new PVector(x, y));}
+                else if (check_color(x-1, y, black)) {points.add(new PVector(x, y));}
+                else if (check_color(x, y+1, black)) {points.add(new PVector(x, y));}
+                else if (check_color(x, y-1, black)) {points.add(new PVector(x, y));}
+            }
+        }
+    }
+    console.log("Color " + c + " has " + points.size() + " marginal points.");
+    return points;
 }
 
 color random_color() {
