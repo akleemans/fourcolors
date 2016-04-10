@@ -1,6 +1,8 @@
 /*
 Some code for drawing on a canvas and then color the whole thing.
 Work in progress.
+
+Pure gold: http://processingjs.org/reference/
 */
 
 
@@ -162,7 +164,7 @@ void solve() {
     else if (solve_stage == 4) {
         update_status("Analyzing neighbors & finding edges...");
         // TODO generate graph pt. 2: find edges
-
+        find_edges();
         update_status("Found a total of " + edges.size() + " edges.");
         solve_stage++;
     }
@@ -239,6 +241,42 @@ void find_nodes() {
                 do { col = random_color(); } while (nodes.contains(col));
                 nodes.add(col);
                 fill_area(x, y, col);
+            }
+        }
+    }
+}
+
+/* Rand-pixel pro node identifizieren, um diese mit anderen nodes zu vergleichen*/
+void find_edges() {
+    // find marginal points from all nodes
+    for (int i = 0; i < nodes.size(); i++) {
+        color c = nodes.get(i);
+        marginal_points.add(find_marginal_points(c));
+    }
+
+    // compare and check if nodes have an edge
+    for (int i = 0; i < nodes.size(); i++) {
+        for (int j = i+1; j < nodes.size(); j++) {
+            boolean exit_flag = false;
+            ArrayList a = marginal_points.get(i);
+            ArrayList b = marginal_points.get(j);
+
+            // check marginal points for distance
+            for (int k = 0; k < a.size(); k++) {
+                if (exit_flag) break;
+                for (int l = 0; l < b.size(); l++) {
+                    PVector p0 = a.get(k);
+                    PVector p1 = b.get(l);
+                    // TODO tune this distance accordingly
+                    if (dist(p0.x, p0.y, p1.x, p1.y) < 5) {
+                        // edge between nodes i and j found
+                        console.log("Edge found between " + i + " / " + j);
+                        visible_edges.add([new PVector(p0.x, p0.y), new PVector(p1.x, p1.y)]);
+                        edges.add([i, j])
+                        exit_flag =  true;
+                        break;
+                    }
+                }
             }
         }
     }
