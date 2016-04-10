@@ -34,6 +34,7 @@ PVector start, end;
 boolean dragging;
 boolean stop_updating = false;
 float solve_start;
+int solve_stage = -1;
 
 /* Setting up canvas. */
 void setup() {
@@ -129,6 +130,7 @@ void button_reset() {
 }
 
 void button_solve() {
+    solve_start = millis();
     solve_stage = 0;
     stop_updating = true;
 }
@@ -136,16 +138,64 @@ void button_solve() {
 /* Main solving method.
 The solving takes place in stages and logs its progress. */
 void solve() {
-    // TODO integrate solve_stage
+    if (solve_stage == 0) {
+        update_status("Loading pixels...");
+        // get pixel grid, w x h = 400 x 200
+        loadPixels();
+        for (int y = 0; y < grid_h; y++) {
+            for (int x = 0; x < grid_w; x++) {
+                int src = (grid_margin+y)*w + x+grid_margin;
+                grid[y*grid_w + x] = pixels[src];
+            }
+        }
+        solve_stage++;
+    }
+    else if (solve_stage == 1 && check_time()) { solve_stage++; }
+    else if (solve_stage == 2) {
+        update_status("Analyzing areas & finding nodes...");
+        // TODO find nodes
+        update_pixels();
+        update_status("Found a total of " + nodes.size() + " areas/nodes.");
+        solve_stage++;
+    }
+    else if (solve_stage == 3 && check_time()) { solve_stage++; }
+    else if (solve_stage == 4) {
+        update_status("Analyzing neighbors & finding edges...");
+        // TODO generate graph pt. 2: find edges
+        update_status("Found a total of " + edges.size() + " edges.");
+        solve_stage++;
+    }
+    else if (solve_stage == 5 && check_time()) { solve_stage++; }
+    else if (solve_stage == 6) {
+        update_status("Building graph...");
+        // TODO build graph
 
-    // TODO find marginal points
+        solve_stage++;
+    }
+    else if (solve_stage == 7 && check_time()) { solve_stage++; }
+    else if (solve_stage == 8) {
+        update_status("Solving graph, stand by");
+        // TODO solving graph
 
-    // TODO find nodes
+        solve_stage++;
+    }
+    else if (solve_stage == 9 && check_time()) { solve_stage++; }
+    else if (solve_stage == 10) {
+        update_status("Coloring graph accordingly...");
+        // TODO color graph
+        update_pixels();
+        solve_stage++;
+    }
+    else if (solve_stage == 11 && check_time()) { solve_stage++; }
+    else if (solve_stage == 12) {
+        update_status("Finished!");
+        update_pixels();
+        solve_stage++;
+    }
+}
 
-    // TODO find neighbors/edges
-
-    // TODO solve graph
-
+boolean check_time() {
+    return (solve_start + solve_stage*1000) < millis();
 }
 
 void update_pixels() {
@@ -170,6 +220,16 @@ void update_pixels() {
 
     stroke(black);
     strokeWeight(1);
+}
+
+void update_status(String s) {
+    document.getElementById("log").innerHTML += '<br>' + s;
+    console.log(s);
+}
+
+color random_color() {
+    //return randomColor({luminosity: 'bright'});
+    return color(random(255), random(255), random(255));
 }
 
 /* Fill area with color c using BFS. */
