@@ -4,13 +4,17 @@ An visual demonstration of the four color theorem / map solver, powered by [Proc
 
 For more information and a demo see [this blog post](https://www.kleemans.ch/four-color-theorem-map-solver).
 
-<img align="center" src="https://github.com/akleemans/fourcolors/blob/master/coloring.png" alt="graph coloring">
+<p align="center">
+    <img src="https://github.com/akleemans/fourcolors/blob/master/coloring.png" alt="graph coloring">
+</p>
 
 ## How it works
 
 The algorithm in action:
 
-<img align="center" src="https://github.com/akleemans/fourcolors/blob/master/coloring.gif" alt="graph coloring">
+<p align="center">
+    <img src="https://github.com/akleemans/fourcolors/blob/master/coloring.gif" alt="graph coloring">
+</p>
 
 First, the user draws on the canvas. Once finished, the process could be as follows:
 
