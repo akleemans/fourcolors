@@ -515,7 +515,7 @@ void button_reset() {
     lines = new ArrayList();
     stop_updating = false;
     image_loaded = false;
-    document.getElementById("data").innerHTML = '';
+    //document.getElementById("data").innerHTML = '';
     document.getElementById("log").innerHTML = '';
     nodes.clear();
     edges.clear();
