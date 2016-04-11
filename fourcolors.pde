@@ -57,6 +57,7 @@ void draw() {
     if (stop_updating) {
         // only update inner grid
         update_pixels();
+        frameRate(5);
     }
     else {
         background(255);
@@ -344,8 +345,6 @@ void update_pixels() {
         updatePixels();
     }
 
-    // TODO name nodes? display text?
-
     // marginal points
     if (node_mapping.size() > 0) {
         for (int y = 0; y < grid_h; y++) {
@@ -512,6 +511,7 @@ void button_solve() {
 }
 
 void button_reset() {
+    frameRate(30);
     lines = new ArrayList();
     stop_updating = false;
     image_loaded = false;
