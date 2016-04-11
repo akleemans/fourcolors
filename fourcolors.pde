@@ -40,7 +40,7 @@ int solve_stage = -1;
 
 /* Setting up canvas. */
 void setup() {
-    console.log("Starting up.");
+    update_status("Starting up.");
     noSmooth();
     size(w, h);
     frameRate(30);
@@ -133,6 +133,7 @@ void button_reset() {
     edges.clear();
     visible_edges.clear();
     marginal_points.clear();
+    node_mapping.clear();
 }
 
 void button_solve() {
@@ -181,7 +182,7 @@ void solve() {
     }
     else if (solve_stage == 7 && check_time()) { solve_stage++; }
     else if (solve_stage == 8) {
-        update_status("Coloring graph accordingly...");
+        //update_status("Coloring graph accordingly...");
         // TODO color graph
         update_pixels();
         solve_stage++;
@@ -197,43 +198,93 @@ void solve() {
 void solve_graph() {
     // TODO solving graph
 
-    // Welsh-Powell algorithm
     // for each node, calculate valence (nr of connected edges)
-    console.log("Calculating valence...");
+    update_status("Calculating valence...");
     int[] valence = new int[nodes.size()];
+    int max_valence = 0;
     for (int i = 0; i < nodes.size(); i++) {
         for (int j = 0; j < edges.size(); j++) {
             int[] e = edges.get(j);
-            if (e[0] == i || e[1] == i) valence[i] += 1;
+            if (e[0] == i || e[1] == i) {
+                valence[i] += 1;
+            }
         }
+        if (max_valence < valence[i])
+            max_valence = valence[i];
     }
 
     // sort by valence (bucket sort)
-    int v = 0;
+    update_status("Valence list: ");
+    int v = max_valence;
     ArrayList sorted_nodes = new ArrayList();
-    while (sorted_nodes.size() < nodes.size()) {
+    ArrayList node_map = new ArrayList();
+    while (v > 0) { //sorted_nodes.size() < nodes.size()
         for (int i = 0; i < nodes.size(); i++) {
             if (valence[i] == v) {
                 sorted_nodes.add(nodes.get(i));
-                console.log("Node " + i + " has valence " + valence[i]);
+                node_map.add(i);
+                update_status("- Node " + i + ": valence " + valence[i]);
             }
         }
-        v += 1;
+        v -= 1;
     }
 
-    // TODO begin coloring
-    int c = 0;
-    for (int i = 0; i < sorted_nodes.size(); i++) {
-        node_mapping.add([sorted_nodes.get(i), colors[i%4]]);
+    // the sorted nodes are the new normal nodes
+    //nodes.clear();
+    //nodes = sorted_nodes;
+
+    // begin coloring using Welsh-Powell algorithm
+    // http://mrsleblancsmath.pbworks.com/w/file/fetch/46119304/vertex%20coloring%20algorithm.pdf
+    int[] already_colored = new int[nodes.size()];
+    for (int i = 0; i < nodes.size(); i++) { already_colored[i] = -1; }
+    for (int c = 0; c < 4; c++) {
+        int col = colors[c];
+        // color all nodes, not connected
+        for (int i = 0; i < nodes.size(); i++) {
+            // getting sorted node nr.
+            int n = node_map.get(i);
+            // only check further if not already colored
+            if (already_colored[n] == -1) {
+                coloring_possible = true;
+                // check if coloring is possible
+                for (int j = 0; j < i; j++) {
+                    int n1 = node_map.get(j);
+                    if (already_colored[n1] == c && have_edge(n, n1)) {
+                        coloring_possible = false;
+                    }
+
+                }
+                if (coloring_possible) {
+                    //update_status("Coloring node " + n + " with color " + c + "!");
+                    node_mapping.add([nodes.get(n), col]);
+                    already_colored[n] = c;
+                }
+            }
+        }
+    }
+
+    if (node_mapping.size() < nodes.size()) {
+        update_status("Not successful! could only color " + node_mapping.size() + " out of " + nodes.size());
+    }
+    else {
+        update_status("Coloring successful with Welsh-Powell algorithm!");
     }
 
     // TODO if this doesn't work, try other algorithm. backtracing?
 
 }
 
-// TODO to implement
 boolean have_edge(int n0, int n1) {
     // check if nodes have an edge
+    for (int i = 0; i < edges.size(); i++) {
+        int[] e = edges.get(i);
+        if ( (e[0] == n0 && e[1] == n1) ||
+             (e[0] == n1 && e[1] == n0) ) {
+            return true;
+        }
+    }
+    // no edge found until now
+    return false;
 }
 
 boolean check_time() {
@@ -336,7 +387,7 @@ void find_edges() {
                     // TODO fine-tune this distance accordingly
                     if (dist(p0.x, p0.y, p1.x, p1.y) < 5) {
                         // edge between nodes i and j found
-                        console.log("Edge found between " + i + " / " + j);
+                        //update_status("Edge found between " + i + " / " + j);
                         visible_edges.add([new PVector(p0.x, p0.y), new PVector(p1.x, p1.y)]);
                         edges.add([i, j])
                         exit_flag =  true;
@@ -363,7 +414,7 @@ ArrayList find_marginal_points(color c) {
             }
         }
     }
-    console.log("Color " + c + " has " + points.size() + " marginal points.");
+    //update_status("Color " + c + " has " + points.size() + " marginal points.");
     return points;
 }
 
