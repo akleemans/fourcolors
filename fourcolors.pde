@@ -30,6 +30,7 @@ ArrayList edges = new ArrayList();
 ArrayList marginal_points = new ArrayList();
 ArrayList visible_edges = new ArrayList();
 ArrayList node_mapping = new ArrayList();
+int[] color_map;
 
 ArrayList lines = new ArrayList();
 PVector start, end;
@@ -180,27 +181,13 @@ void solve() {
     else if (solve_stage == 6) {
         update_status("Building & solving graph, stand by...");
         solve_graph();
-        update_pixels();
-        solve_stage++;
-    }
-    else if (solve_stage == 7 && check_time()) { solve_stage++; }
-    else if (solve_stage == 8) {
-        //update_status("Coloring graph accordingly...");
-        // TODO color graph
-        update_pixels();
-        solve_stage++;
-    }
-    else if (solve_stage == 9 && check_time()) { solve_stage++; }
-    else if (solve_stage == 10) {
-        update_status("Finished!");
+        update_status("Finished.");
         update_pixels();
         solve_stage++;
     }
 }
 
 void solve_graph() {
-    // TODO solving graph
-
     // for each node, calculate valence (nr of connected edges)
     update_status("Calculating valence...");
     int[] valence = new int[nodes.size()];
@@ -217,16 +204,16 @@ void solve_graph() {
     }
 
     // sort by valence (bucket sort)
-    update_status("Valence list: ");
+    //update_status("Valence list: ");
     int v = max_valence;
     ArrayList sorted_nodes = new ArrayList();
     ArrayList node_map = new ArrayList();
     while (v > 0) { //sorted_nodes.size() < nodes.size()
         for (int i = 0; i < nodes.size(); i++) {
             if (valence[i] == v) {
+                if (sorted_nodes.size() == 0) update_status("Node " + i + " has highest valence: " + v);
                 sorted_nodes.add(nodes.get(i));
                 node_map.add(i);
-                update_status("- Node " + i + ": valence " + valence[i]);
             }
         }
         v -= 1;
@@ -238,8 +225,8 @@ void solve_graph() {
 
     // begin coloring using Welsh-Powell algorithm
     // http://mrsleblancsmath.pbworks.com/w/file/fetch/46119304/vertex%20coloring%20algorithm.pdf
-    int[] already_colored = new int[nodes.size()];
-    for (int i = 0; i < nodes.size(); i++) { already_colored[i] = -1; }
+    color_map = new int[nodes.size()];
+    for (int i = 0; i < nodes.size(); i++) { color_map[i] = -1; }
     for (int c = 0; c < 4; c++) {
         int col = colors[c];
         // color all nodes, not connected
@@ -247,12 +234,12 @@ void solve_graph() {
             // getting sorted node nr.
             int n = node_map.get(i);
             // only check further if not already colored
-            if (already_colored[n] == -1) {
+            if (color_map[n] == -1) {
                 coloring_possible = true;
                 // check if coloring is possible
                 for (int j = 0; j < i; j++) {
                     int n1 = node_map.get(j);
-                    if (already_colored[n1] == c && have_edge(n, n1)) {
+                    if (color_map[n1] == c && have_edge(n, n1)) {
                         coloring_possible = false;
                     }
 
@@ -260,22 +247,37 @@ void solve_graph() {
                 if (coloring_possible) {
                     //update_status("Coloring node " + n + " with color " + c + "!");
                     node_mapping.add([nodes.get(n), col]);
-                    already_colored[n] = c;
+                    color_map[n] = c;
                 }
             }
         }
     }
 
     if (node_mapping.size() < nodes.size()) {
-        update_status("Not successful! could only color " + node_mapping.size() + " out of " + nodes.size());
+        update_status("Welsh-Powell not successful, could only color " + node_mapping.size() + " out of " + nodes.size() + ". Trying backtracking...");
     }
     else {
         update_status("Coloring successful with Welsh-Powell algorithm!");
+        return;
     }
 
     // TODO if this doesn't work, try other algorithm. backtracing?
 
 }
+
+boolean color_connected(int n, int c) {
+    // check edges to other nodes and check their colors consulting color_map
+    //color col = colors[c];
+    //color n = nodes.get(i);
+    for (int i = 0; i < edges.size(); i++) {
+        int[] e = edges.get(i);
+        if ( (n == e[0] && color_map[e[1]] == c) || (n == e[1] && color_map[e[0]] == c) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 boolean have_edge(int n0, int n1) {
     // check if nodes have an edge
