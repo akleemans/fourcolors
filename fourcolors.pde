@@ -222,6 +222,8 @@ void solve_graph() {
     // the sorted nodes are the new normal nodes
     //nodes.clear();
     //nodes = sorted_nodes;
+    //edges.clear();
+    //edges = sorted_edges;
 
     // begin coloring using Welsh-Powell algorithm
     // http://mrsleblancsmath.pbworks.com/w/file/fetch/46119304/vertex%20coloring%20algorithm.pdf
