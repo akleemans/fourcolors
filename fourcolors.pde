@@ -17,7 +17,7 @@ int[] grid = new int[grid_h*grid_w];
 
 color black = color(#000000);
 color white = color(#FFFFFF);
-color purple = color(#800080);
+color green = color(#00FF00);
 color pink = color(#FF00FF);
 
 color r = color(#E2041B);
@@ -129,6 +129,10 @@ void button_reset() {
     stop_updating = false;
     document.getElementById("data").innerHTML = '';
     document.getElementById("log").innerHTML = '';
+    nodes.clear();
+    edges.clear();
+    visible_edges.clear();
+    marginal_points.clear();
 }
 
 void button_solve() {
@@ -213,12 +217,24 @@ void update_pixels() {
 
     // TODO name nodes? display text?
 
-    // visible edges
+    // marginal points
     stroke(pink);
+    strokeWeight(2);
+    int m = grid_margin;
+    for (int i = 0; i < marginal_points.size(); i++) {
+        ArrayList node = marginal_points.get(i);
+        for (int j = 0; j < node.size(); j++) {
+            PVector p = node.get(j);
+            point(p.x + m, p.y + m);
+        }
+    }
+
+    // visible edges
+    stroke(green);
     strokeWeight(4);
     for (int i = 0; i < visible_edges.size(); i++) {
         PVector[] pts = visible_edges.get(i);
-        line(pts[0].x, pts[0].y, pts[1].x, pts[1].y);
+        line(pts[0].x+m, pts[0].y+m, pts[1].x+m, pts[1].y+m);
     }
 
     stroke(black);
@@ -267,7 +283,7 @@ void find_edges() {
                 for (int l = 0; l < b.size(); l++) {
                     PVector p0 = a.get(k);
                     PVector p1 = b.get(l);
-                    // TODO tune this distance accordingly
+                    // TODO fine-tune this distance accordingly
                     if (dist(p0.x, p0.y, p1.x, p1.y) < 5) {
                         // edge between nodes i and j found
                         console.log("Edge found between " + i + " / " + j);
