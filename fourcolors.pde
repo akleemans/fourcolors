@@ -272,30 +272,45 @@ void solve_graph() {
     edges = edges_backup;
     nodes = nodes_backup;
 
+    // profiling
+    int[] level = new int[nodes.size()];
+    for (int i = 0; i < nodes.size(); i++) { level[i] = 0; }
+
     // add map with initial node and red
     node_mapping.clear();
     color_map[0] = 0;
     int i = 1;
     float start = millis();
+
     // algorithm ends when last element is set
     while (i < nodes.size()) {
+        level[i] += 1;
         // time check
         if (millis() - start > 10*1000) { break; }
+        //if (i>1) console.log("i =" + i + ", surrounding colors: " + color_map[i-1] + " " + color_map[i] + " " + color_map[i+1]);
 
         // assign color, starting from lowest color allowed
+        boolean succesful = false;
         for (int c = color_map[i]+1; c < 4; c++) {
+            console.log("Trying color "+ c);
             if (!color_connected(i, c)) {
                 color_map[i] = c;
                 // reset all following colors
                 for (int j = i + 1; j < nodes.size(); j++) {
                     color_map[j] = -1;
                 }
+                succesful = true;
                 break;
             }
         }
+
         // if no color found, go back
-        if (color_map[i] == -1) { i -= 1; }
+        if (color_map[i] == -1 || !succesful) { i -= 1; }
         else { i += 1; }
+    }
+
+    for (int i = 0; i < nodes.size(); i++) {
+        console.log("level "+i+":" + level[i]);
     }
 
     // check if solution found in time
