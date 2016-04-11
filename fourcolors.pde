@@ -243,6 +243,7 @@ void solve_graph() {
                     int n1 = node_map.get(j);
                     if (color_map[n1] == c && have_edge(n, n1)) {
                         coloring_possible = false;
+                        break;
                     }
 
                 }
@@ -508,7 +509,12 @@ boolean check_color(int x, int y, color col) {
 
 void button_generate_image() {
     img_data = document.getElementsByTagName("canvas")[0].toDataURL();
-    document.getElementById("data").innerHTML = 'Generated image: <br> <img height="50" src="' + img_data + '">'
+    if (document.getElementById("data").innerHTML == '') {
+        document.getElementById("data").innerHTML = 'Snapshots: <br> <img height="50" src="' + img_data + '">'
+    }
+    else {
+        document.getElementById("data").innerHTML += '<img height="50" src="' + img_data + '">'
+    }
 }
 
 void button_load_image(s) {
