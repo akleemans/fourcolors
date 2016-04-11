@@ -261,8 +261,45 @@ void solve_graph() {
         return;
     }
 
-    // TODO if this doesn't work, try other algorithm. backtracing?
+    // ===== brute-force with backtracking ====
+    // resetting color_map
+    for (int i = 0; i < nodes.size(); i++) { color_map[i] = -1; }
 
+    // add map with initial node and red
+
+    node_mapping.clear();
+    color_map[0] = 0;
+    int i = 1;
+    float start = millis();
+    // algorithm ends when last element is set
+    while (i < nodes.size()) {
+        // time check
+        if (millis() - start > 10*1000) { break; }
+
+        // assign color, starting from lowest color allowed
+        for (int c = color_map[i]+1; c < 4; c++) {
+            if (!color_connected(i, c)) {
+                color_map[i] = c;
+                // reset all following colors
+                for (int j = i + 1; j < nodes.size(); j++) {
+                    color_map[j] = -1;
+                }
+                break;
+            }
+        }
+        // if no color found, go back
+        if (color_map[i] == -1) { i -= 1; }
+        else { i += 1; }
+    }
+
+    // check if solution found in time
+    int missing = 0;
+    for (int i = 0; i < nodes.size(); i++) {
+        if (color_map[i] == -1 ) { missing += 1; }
+        else { node_mapping.add([nodes.get(i), colors[color_map[i]]]); }
+    }
+    if (missing > 0) { update_status("No solution found in time."); }
+    else { update_status("Solution found with backtracking!"); }
 }
 
 boolean color_connected(int n, int c) {
