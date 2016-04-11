@@ -211,7 +211,7 @@ void solve_graph() {
     while (v > 0) { //sorted_nodes.size() < nodes.size()
         for (int i = 0; i < nodes.size(); i++) {
             if (valence[i] == v) {
-                if (sorted_nodes.size() == 0) update_status("Node " + i + "/" + nodes.get(i) + " has highest valence: " + v);
+                if (sorted_nodes.size() == 0) update_status("Node " + i + " has highest valence: " + v);
                 sorted_nodes.add(nodes.get(i));
                 node_map.add(i);
                 node_lookup[i] = sorted_nodes.size()-1;
@@ -221,8 +221,10 @@ void solve_graph() {
     }
 
     // update edges to correspond to newly sorted nodes
+    ArrayList nodes_backup = nodes;
+    ArrayList edges_backup = edges;
+
     nodes = sorted_nodes;
-    update_status("First node is now: " + nodes.get(0));
     ArrayList sorted_edges = new ArrayList();
     for (int i = 0; i < edges.size(); i++) {
         int[] e = edges.get(i);
@@ -238,27 +240,19 @@ void solve_graph() {
         int col = colors[c];
         // color all nodes, not connected
         for (int i = 0; i < nodes.size(); i++) {
-            // getting sorted node nr.
-            //int n = node_map.get(i);
-            int n = i;
-            update_status("checking node " + nodes.get(n));
             // only check further if not already colored
-            if (color_map[n] == -1) {
+            if (color_map[i] == -1) {
                 coloring_possible = true;
                 // check if coloring is possible
                 for (int j = 0; j < i; j++) {
-                    //int n1 = node_map.get(j);
-                    int n1 = j;
-                    if (color_map[n1] == c && have_edge(n, n1)) {
+                    if (color_map[j] == c && have_edge(i, j)) {
                         coloring_possible = false;
                         break;
                     }
-
                 }
                 if (coloring_possible) {
-                    //update_status("Coloring node " + n + " with color " + c + "!");
-                    node_mapping.add([nodes.get(n), col]);
-                    color_map[n] = c;
+                    node_mapping.add([nodes.get(i), col]);
+                    color_map[i] = c;
                 }
             }
         }
@@ -275,9 +269,10 @@ void solve_graph() {
     // ===== brute-force with backtracking ====
     // resetting color_map
     for (int i = 0; i < nodes.size(); i++) { color_map[i] = -1; }
+    edges = edges_backup;
+    nodes = nodes_backup;
 
     // add map with initial node and red
-
     node_mapping.clear();
     color_map[0] = 0;
     int i = 1;
@@ -315,8 +310,6 @@ void solve_graph() {
 
 boolean color_connected(int n, int c) {
     // check edges to other nodes and check their colors consulting color_map
-    //color col = colors[c];
-    //color n = nodes.get(i);
     for (int i = 0; i < edges.size(); i++) {
         int[] e = edges.get(i);
         if ( (n == e[0] && color_map[e[1]] == c) || (n == e[1] && color_map[e[0]] == c) ) {
@@ -325,7 +318,6 @@ boolean color_connected(int n, int c) {
     }
     return false;
 }
-
 
 boolean have_edge(int n0, int n1) {
     // check if nodes have an edge
