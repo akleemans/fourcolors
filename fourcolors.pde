@@ -5,7 +5,6 @@ Work in progress.
 Pure gold: http://processingjs.org/reference/
 */
 
-
 /* Some general variables. */
 int scale = 4;
 int h = 300;
@@ -30,6 +29,7 @@ ArrayList nodes = new ArrayList();
 ArrayList edges = new ArrayList();
 ArrayList marginal_points = new ArrayList();
 ArrayList visible_edges = new ArrayList();
+ArrayList node_mapping = new ArrayList();
 
 ArrayList lines = new ArrayList();
 PVector start, end;
@@ -166,39 +166,74 @@ void solve() {
     }
     else if (solve_stage == 3 && check_time()) { solve_stage++; }
     else if (solve_stage == 4) {
-        update_status("Analyzing neighbors & finding edges...");
-        // TODO generate graph pt. 2: find edges
+        update_status("Analyzing marginal points & finding edges...");
         find_edges();
+        update_pixels();
         update_status("Found a total of " + edges.size() + " edges.");
         solve_stage++;
     }
     else if (solve_stage == 5 && check_time()) { solve_stage++; }
     else if (solve_stage == 6) {
-        update_status("Building graph...");
-        // TODO build graph
-
+        update_status("Building & solving graph, stand by...");
+        solve_graph();
+        update_pixels();
         solve_stage++;
     }
     else if (solve_stage == 7 && check_time()) { solve_stage++; }
     else if (solve_stage == 8) {
-        update_status("Solving graph, stand by");
-        // TODO solving graph
-
-        solve_stage++;
-    }
-    else if (solve_stage == 9 && check_time()) { solve_stage++; }
-    else if (solve_stage == 10) {
         update_status("Coloring graph accordingly...");
         // TODO color graph
         update_pixels();
         solve_stage++;
     }
-    else if (solve_stage == 11 && check_time()) { solve_stage++; }
-    else if (solve_stage == 12) {
+    else if (solve_stage == 9 && check_time()) { solve_stage++; }
+    else if (solve_stage == 10) {
         update_status("Finished!");
         update_pixels();
         solve_stage++;
     }
+}
+
+void solve_graph() {
+    // TODO solving graph
+
+    // Welsh-Powell algorithm
+    // for each node, calculate valence (nr of connected edges)
+    console.log("Calculating valence...");
+    int[] valence = new int[nodes.size()];
+    for (int i = 0; i < nodes.size(); i++) {
+        for (int j = 0; j < edges.size(); j++) {
+            int[] e = edges.get(j);
+            if (e[0] == i || e[1] == i) valence[i] += 1;
+        }
+    }
+
+    // sort by valence (bucket sort)
+    int v = 0;
+    ArrayList sorted_nodes = new ArrayList();
+    while (sorted_nodes.size() < nodes.size()) {
+        for (int i = 0; i < nodes.size(); i++) {
+            if (valence[i] == v) {
+                sorted_nodes.add(nodes.get(i));
+                console.log("Node " + i + " has valence " + valence[i]);
+            }
+        }
+        v += 1;
+    }
+
+    // TODO begin coloring
+    int c = 0;
+    for (int i = 0; i < sorted_nodes.size(); i++) {
+        node_mapping.add([sorted_nodes.get(i), colors[i%4]]);
+    }
+
+    // TODO if this doesn't work, try other algorithm. backtracing?
+
+}
+
+// TODO to implement
+boolean have_edge(int n0, int n1) {
+    // check if nodes have an edge
 }
 
 boolean check_time() {
@@ -218,23 +253,38 @@ void update_pixels() {
     // TODO name nodes? display text?
 
     // marginal points
-    stroke(pink);
-    strokeWeight(2);
-    int m = grid_margin;
-    for (int i = 0; i < marginal_points.size(); i++) {
-        ArrayList node = marginal_points.get(i);
-        for (int j = 0; j < node.size(); j++) {
-            PVector p = node.get(j);
-            point(p.x + m, p.y + m);
+    if (node_mapping.size() > 0) {
+        for (int y = 0; y < grid_h; y++) {
+            for (int x = 0; x < grid_w; x++) {
+                color c = grid[y*grid_w + x];
+                for (int i = 0; i < node_mapping.size(); i++) {
+                    int[] m = node_mapping.get(i);
+                    if (c == m[0]) {
+                        grid[y*grid_w + x] = m[1];
+                    }
+                }
+            }
         }
     }
+    else {
+        stroke(pink);
+        strokeWeight(2);
+        int m = grid_margin;
+        for (int i = 0; i < marginal_points.size(); i++) {
+            ArrayList node = marginal_points.get(i);
+            for (int j = 0; j < node.size(); j++) {
+                PVector p = node.get(j);
+                point(p.x + m, p.y + m);
+            }
+        }
 
-    // visible edges
-    stroke(green);
-    strokeWeight(4);
-    for (int i = 0; i < visible_edges.size(); i++) {
-        PVector[] pts = visible_edges.get(i);
-        line(pts[0].x+m, pts[0].y+m, pts[1].x+m, pts[1].y+m);
+        // visible edges
+        stroke(green);
+        strokeWeight(4);
+        for (int i = 0; i < visible_edges.size(); i++) {
+            PVector[] pts = visible_edges.get(i);
+            line(pts[0].x+m, pts[0].y+m, pts[1].x+m, pts[1].y+m);
+        }
     }
 
     stroke(black);
