@@ -35,6 +35,7 @@ ArrayList lines = new ArrayList();
 PVector start, end;
 boolean dragging;
 boolean stop_updating = false;
+boolean image_loaded = false;
 float solve_start;
 int solve_stage = -1;
 
@@ -127,6 +128,7 @@ void mouseReleased() {
 void button_reset() {
     lines = new ArrayList();
     stop_updating = false;
+    image_loaded = false;
     document.getElementById("data").innerHTML = '';
     document.getElementById("log").innerHTML = '';
     nodes.clear();
@@ -155,6 +157,7 @@ void solve() {
                 grid[y*grid_w + x] = pixels[src];
             }
         }
+        image_loaded = false;
         solve_stage++;
     }
     else if (solve_stage == 1 && check_time()) { solve_stage++; }
@@ -292,14 +295,16 @@ boolean check_time() {
 }
 
 void update_pixels() {
-    loadPixels();
-    for (int y = 0; y < grid_h; y++) {
-        for (int x = 0; x < grid_w; x++) {
-            int dest = (grid_margin+y)*w + x+grid_margin;
-            pixels[dest] = grid[y*grid_w + x];
+    if (!image_loaded) {
+        loadPixels();
+        for (int y = 0; y < grid_h; y++) {
+            for (int x = 0; x < grid_w; x++) {
+                int dest = (grid_margin+y)*w + x+grid_margin;
+                pixels[dest] = grid[y*grid_w + x];
+            }
         }
+        updatePixels();
     }
-    updatePixels();
 
     // TODO name nodes? display text?
 
@@ -454,4 +459,16 @@ boolean check_color(int x, int y, color col) {
 void button_generate_image() {
     img_data = document.getElementsByTagName("canvas")[0].toDataURL();
     document.getElementById("data").innerHTML = 'Generated image: <br> <img height="50" src="' + img_data + '">'
+}
+
+void button_load_image(s) {
+    canvas = document.getElementsByTagName("canvas")[0];
+    context = canvas.getContext('2d');
+    img = new Image();
+    stop_updating = true;
+    image_loaded = true;
+    img.onload = function() {
+        context.drawImage(this, 0, 0, canvas.width, canvas.height);
+    }
+    img.src = s;
 }
