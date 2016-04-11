@@ -126,25 +126,6 @@ void mouseReleased() {
     start = new PVector(end.x, end.y); // build map by single clicks
 }
 
-void button_reset() {
-    lines = new ArrayList();
-    stop_updating = false;
-    image_loaded = false;
-    document.getElementById("data").innerHTML = '';
-    document.getElementById("log").innerHTML = '';
-    nodes.clear();
-    edges.clear();
-    visible_edges.clear();
-    marginal_points.clear();
-    node_mapping.clear();
-}
-
-void button_solve() {
-    solve_start = millis();
-    solve_stage = 0;
-    stop_updating = true;
-}
-
 /* Main solving method.
 The solving takes place in stages and logs its progress. */
 void solve() {
@@ -522,6 +503,27 @@ boolean check_color(int x, int y, color col) {
 }
 
 
+/* -------- buttons -------- */
+
+void button_solve() {
+    solve_start = millis();
+    solve_stage = 0;
+    stop_updating = true;
+}
+
+void button_reset() {
+    lines = new ArrayList();
+    stop_updating = false;
+    image_loaded = false;
+    document.getElementById("data").innerHTML = '';
+    document.getElementById("log").innerHTML = '';
+    nodes.clear();
+    edges.clear();
+    visible_edges.clear();
+    marginal_points.clear();
+    node_mapping.clear();
+}
+
 void button_generate_image() {
     img_data = document.getElementsByTagName("canvas")[0].toDataURL();
     if (document.getElementById("data").innerHTML == '') {
@@ -533,6 +535,7 @@ void button_generate_image() {
 }
 
 void button_load_image(s) {
+    button_reset();
     canvas = document.getElementsByTagName("canvas")[0];
     context = canvas.getContext('2d');
     img = new Image();
