@@ -330,7 +330,7 @@ boolean have_edge(int n0, int n1) {
 }
 
 boolean check_time() {
-    return (solve_start + solve_stage*1000) < millis();
+    return (solve_start + solve_stage*500) < millis();
 }
 
 void update_pixels() {
@@ -399,9 +399,10 @@ void find_nodes() {
             if (grid[grid_w*y + x] == white) {
                 color col;
                 // color is our node key, avoid collisions
-                do { col = random_color(); } while (nodes.contains(col));
-                nodes.add(col);
-                fill_area(x, y, col);
+                do { col = random_color(); } while (nodes.contains(col) && col != black);
+
+                // if fill_area return a new area, verify node
+                if (fill_area(x, y, col)) nodes.add(col);
             }
         }
     }
@@ -414,6 +415,7 @@ void find_edges() {
         color c = nodes.get(i);
         marginal_points.add(find_marginal_points(c));
     }
+    update_status("Found marginal points for all areas.");
 
     // compare and check if nodes have an edge
     for (int i = 0; i < nodes.size(); i++) {
@@ -431,7 +433,6 @@ void find_edges() {
                     // TODO fine-tune this distance accordingly
                     if (dist(p0.x, p0.y, p1.x, p1.y) < 5) {
                         // edge between nodes i and j found
-                        //update_status("Edge found between " + i + " / " + j);
                         visible_edges.add([new PVector(p0.x, p0.y), new PVector(p1.x, p1.y)]);
                         edges.add([i, j])
                         exit_flag =  true;
@@ -469,6 +470,7 @@ color random_color() {
 
 /* Fill area with color c using BFS. */
 void fill_area(x, y, c) {
+    int n = 0;
     ArrayList queue = new ArrayList();
     queue.add(new PVector(x, y));
 
@@ -478,6 +480,7 @@ void fill_area(x, y, c) {
         PVector p = queue.get(last);
         queue.remove(last);
         grid[p.y*grid_w + p.x] = c;
+        n += 1;
 
         // check neighbors
         if (check_color(p.x, p.y+1, white)) queue.add(new PVector(p.x, p.y+1));
@@ -485,6 +488,12 @@ void fill_area(x, y, c) {
         if (check_color(p.x+1, p.y, white)) queue.add(new PVector(p.x+1, p.y));
         if (check_color(p.x-1, p.y, white)) queue.add(new PVector(p.x-1, p.y));
     }
+    // one-pixel bug: if only one pixel, don't count it as separate area
+    if (n == 1) {
+        grid[y*grid_w + x] = black;
+        return false;
+    }
+    else { return true; }
 }
 
 boolean check_color(int x, int y, color col) {
