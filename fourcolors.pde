@@ -204,26 +204,31 @@ void solve_graph() {
     }
 
     // sort by valence (bucket sort)
-    //update_status("Valence list: ");
     int v = max_valence;
     ArrayList sorted_nodes = new ArrayList();
     ArrayList node_map = new ArrayList();
+    int[] node_lookup = new int[nodes.size()]; // node_lookup[alter node] ergibt neuen node
     while (v > 0) { //sorted_nodes.size() < nodes.size()
         for (int i = 0; i < nodes.size(); i++) {
             if (valence[i] == v) {
-                if (sorted_nodes.size() == 0) update_status("Node " + i + " has highest valence: " + v);
+                if (sorted_nodes.size() == 0) update_status("Node " + i + "/" + nodes.get(i) + " has highest valence: " + v);
                 sorted_nodes.add(nodes.get(i));
                 node_map.add(i);
+                node_lookup[i] = sorted_nodes.size()-1;
             }
         }
         v -= 1;
     }
 
-    // the sorted nodes are the new normal nodes
-    //nodes.clear();
-    //nodes = sorted_nodes;
-    //edges.clear();
-    //edges = sorted_edges;
+    // update edges to correspond to newly sorted nodes
+    nodes = sorted_nodes;
+    update_status("First node is now: " + nodes.get(0));
+    ArrayList sorted_edges = new ArrayList();
+    for (int i = 0; i < edges.size(); i++) {
+        int[] e = edges.get(i);
+        sorted_edges.add([ node_lookup[e[0]], node_lookup[e[1]] ]);
+    }
+    edges = sorted_edges;
 
     // begin coloring using Welsh-Powell algorithm
     // http://mrsleblancsmath.pbworks.com/w/file/fetch/46119304/vertex%20coloring%20algorithm.pdf
@@ -234,13 +239,16 @@ void solve_graph() {
         // color all nodes, not connected
         for (int i = 0; i < nodes.size(); i++) {
             // getting sorted node nr.
-            int n = node_map.get(i);
+            //int n = node_map.get(i);
+            int n = i;
+            update_status("checking node " + nodes.get(n));
             // only check further if not already colored
             if (color_map[n] == -1) {
                 coloring_possible = true;
                 // check if coloring is possible
                 for (int j = 0; j < i; j++) {
-                    int n1 = node_map.get(j);
+                    //int n1 = node_map.get(j);
+                    int n1 = j;
                     if (color_map[n1] == c && have_edge(n, n1)) {
                         coloring_possible = false;
                         break;
