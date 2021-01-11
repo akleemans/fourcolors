@@ -2,7 +2,7 @@
 
 An visual demonstration of the four color theorem / map solver, powered by [ProcessingJS](http://processingjs.org/).
 
-For more information and a demo see [this blog post](https://www.kleemans.ch/four-color-theorem-map-solver).
+For more information and a demo see [this blog post](https://www.kleemans.ch/post/four-colors/).
 
 <p align="center">
     <img src="https://github.com/akleemans/fourcolors/blob/master/coloring.png" alt="graph coloring">
